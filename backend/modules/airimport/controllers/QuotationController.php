@@ -120,9 +120,21 @@ class QuotationController extends Controller
 
         if(Yii::$app->request->post('makesi') == '1')
         {
-            $max = Billlanding::find()->max('bl_id');
+            $max = Billlanding::find()
+                    ->where(['kindofexport' => 4])
+                    ->select('bl_number')
+                    ->orderby(['bl_id' => SORT_DESC])
+                    ->one();
                     
-                    $max == null ? $max = 0+1 : $max = $max + 1;
+                    if($max == null){
+                        $max = 1;
+                    }else{
+                        $ex_max = explode("-",$max->bl_number);
+
+                        $max = intval($ex_max[1]);
+
+                        $max == 0 ? $max = 0+1 : $max = $max + 1;
+                    }
 
                     if($max < 10){
                         $nol = '000'.$max;

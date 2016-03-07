@@ -118,9 +118,17 @@ class QuotationController extends Controller
 
         //print_r(Yii::$app->request->post());die;
                 if(Yii::$app->request->post('makesi') == '1'){
-                    $max = Shippinginstruction::find()->max('si_id');
+                    $max = Shippinginstruction::find()
+                            ->where(['kindofexport' => 1])
+                            ->select('no_ref')
+                            ->orderby(['si_id' => SORT_DESC])
+                            ->one();
                     
-                    $max == null ? $max = 0+1 : $max = $max + 1;
+                    $ex_max = explode("/",$max->no_ref);
+
+                    $max = intval($ex_max[0]);
+
+                    $max == 0 ? $max = 0+1 : $max = $max + 1;
 
                     if($max < 10){
                         $nol = '000'.$max;

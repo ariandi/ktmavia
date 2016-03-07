@@ -101,22 +101,35 @@ class BilllandingController extends Controller
         $model = $this->findModel($id);
 
         if(Yii::$app->request->post('makejs') == 1){
-            $max = Jobsheet::find()->max('jobs_id');
-                    
-                    $max == null ? $max = 0+1 : $max = $max + 1;
+            $max = Jobsheet::find()
+                    ->where(['kindofexport' => 1])
+                    ->select('jobs_no')
+                    ->orderby(['jobs_id' => SORT_DESC])
+                    ->one();
+                    //->max('jobs_id');
 
-                    if($max < 10){
-                        $nol = '000'.$max;
-                    }
-                    elseif($max < 100){
-                        $nol = '00'.$max;
-                    }
-                    elseif($max < 1000){
-                        $nol = '0'.$max;
-                    }
-                    else{
-                        $nol = (string)$max;
-                    }
+            if($max == null){
+                $max = 1;
+            }else{
+                $ex_max = explode("/",$max->jobs_no);
+
+                $max = intval($ex_max[0]);
+
+                $max == 0 ? $max = 0+1 : $max = $max + 1;
+            }
+
+            if($max < 10){
+                $nol = '000'.$max;
+            }
+            elseif($max < 100){
+                $nol = '00'.$max;
+            }
+            elseif($max < 1000){
+                $nol = '0'.$max;
+            }
+            else{
+                $nol = (string)$max;
+            }
 
             $si = Shippinginstruction::findOne($model->si_id);
 

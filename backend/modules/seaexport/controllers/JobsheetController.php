@@ -107,9 +107,22 @@ class JobsheetController extends Controller
 
 
         if(Yii::$app->request->post('makeinvo') == 1){
-            $max = Invoice::find()->max('invoice_id');
-                    
-            $max == null ? $max = 0+1 : $max = $max + 1;
+            $max = Invoice::find()
+                    ->where(['kindofexport' => 1])
+                    ->select('invoice_no')
+                    ->orderby(['invoice_id' => SORT_DESC])
+                    ->one();
+                    //->max('invoice_id');
+
+            if($max == null){
+                $max = 1;
+            }else{
+                $ex_max = explode("/",$max->invoice_no);
+
+                $max = intval($ex_max[0]);
+                        
+                $max == 0 ? $max = 0+1 : $max = $max + 1;
+            }
 
             if($max < 10){
                 $nol = '000'.$max;

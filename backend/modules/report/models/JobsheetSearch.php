@@ -15,11 +15,14 @@ class JobsheetSearch extends Jobsheet
     /**
      * @inheritdoc
      */
+    public $from_date;
+    public $to_date;
+
     public function rules()
     {
         return [
-            [['jobs_id', 'shipper', 'consignee', 'pic', 'bl_id', 'active', 'insert_by', 'update_by', 'kindofexport'], 'integer'],
-            [['jobs_name', 'date', 'jobs_no', 'commodity', 'po_sty', 'ctn_qty', 'dimensions', 'destination', 'freight', 'date_rcvd', 'telp_fax', 'gross_w', 'vol_w', 'measurement', 'overseas_agent', 'handling', 'mbl', 'hbl', 'fl', 'remarks', 'handling_by', 'remarks2', 'pickup', 'delivery', 'status', 'insert_date', 'update_date', 'prepain_by', 'approve_by', 'tot_usd'], 'safe'],
+            [['jobs_id', 'pic', 'bl_id', 'active', 'insert_by', 'update_by'], 'integer'],
+            [['jobs_name', 'date', 'jobs_no', 'commodity', 'po_sty', 'ctn_qty', 'dimensions', 'destination', 'freight', 'date_rcvd', 'telp_fax', 'gross_w', 'vol_w', 'measurement', 'overseas_agent', 'handling', 'mbl', 'hbl', 'fl', 'remarks', 'handling_by', 'remarks2', 'pickup', 'delivery', 'status', 'insert_date', 'update_date', 'prepain_by', 'approve_by', 'tot_usd', 'shipper', 'consignee', 'kindofexport', 'from_date', 'to_date'], 'safe'],
             [['tot_expenses', 'tot_bill', 'tot_profit', 'tot_dn', 'tot_cn'], 'number'],
         ];
     }
@@ -46,6 +49,7 @@ class JobsheetSearch extends Jobsheet
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort'=> ['defaultOrder' => ['jobs_id'=>SORT_DESC]],
         ]);
 
         $this->load($params);
@@ -56,15 +60,23 @@ class JobsheetSearch extends Jobsheet
             return $dataProvider;
         }
 
+        $query->joinWith('shippercompany');
+        $query->joinWith([
+                            'consigneecompany' => function ($query) {
+                                $query->from('company cc');
+                            },
+                        ]);
+        $query->joinWith('kindexport');
+
         $query->andFilterWhere([
             'jobs_id' => $this->jobs_id,
-            'date' => $this->date,
-            'shipper' => $this->shipper,
-            'consignee' => $this->consignee,
+            //'date' => $this->date,
+            //'shipper' => $this->shipper,
+            //'consignee' => $this->consignee,
             'date_rcvd' => $this->date_rcvd,
             'pic' => $this->pic,
             'bl_id' => $this->bl_id,
-            'active' => $this->active,
+            'jobsheet.active' => 1,
             'insert_by' => $this->insert_by,
             'insert_date' => $this->insert_date,
             'update_by' => $this->update_by,
@@ -74,7 +86,7 @@ class JobsheetSearch extends Jobsheet
             'tot_profit' => $this->tot_profit,
             'tot_dn' => $this->tot_dn,
             'tot_cn' => $this->tot_cn,
-            'kindofexport' => $this->kindofexport,
+            //'kindofexport' => $this->kindofexport,
         ]);
 
         $query->andFilterWhere(['like', 'jobs_name', $this->jobs_name])
@@ -102,6 +114,11 @@ class JobsheetSearch extends Jobsheet
             ->andFilterWhere(['like', 'status', $this->status])
             ->andFilterWhere(['like', 'prepain_by', $this->prepain_by])
             ->andFilterWhere(['like', 'approve_by', $this->approve_by])
+            ->andFilterWhere(['like', 'company.companyname', $this->shipper])
+            ->andFilterWhere(['like', 'cc.companyname', $this->consignee])
+            ->andFilterWhere(['like', 'kindexport.kindexport_name', $this->kindofexport])
+            ->andFilterWhere(['like', 'date', $this->from_date])
+            ->andFilterWhere(['like', 'date', $this->to_date])
             ->andFilterWhere(['like', 'tot_usd', $this->tot_usd]);
 
         return $dataProvider;

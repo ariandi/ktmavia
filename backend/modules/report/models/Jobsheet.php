@@ -3,7 +3,10 @@
 namespace backend\modules\report\models;
 
 use Yii;
-
+use backend\modules\masterdata\models\Company;
+use backend\modules\masterdata\models\User;
+use backend\modules\masterdata\models\Kindexport;
+use backend\modules\seaexport\billanding;
 /**
  * This is the model class for table "jobsheet".
  *
@@ -128,5 +131,33 @@ class Jobsheet extends \yii\db\ActiveRecord
             'tot_cn' => 'Tot Cn',
             'kindofexport' => 'Kindofexport',
         ];
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getShippercompany()
+    {
+        return $this->hasOne(Company::className(), ['companyid' => 'shipper']);
+    }
+
+    public function getConsigneecompany()
+    {
+        return $this->hasOne(Company::className(), ['companyid' => 'consignee']);
+    }
+
+    public function getPicuser()
+    {
+        return $this->hasOne(User::className(), ['id' => 'pic']);
+    }
+
+    public function getBilllanding()
+    {
+        return $this->hasOne(Billlanding::className(), ['bl_id' => 'bl_id']);
+    }
+
+    public function getKindexport()
+    {
+        return $this->hasOne(Kindexport::className(), ['kindexport_id' => 'kindofexport']);
     }
 }

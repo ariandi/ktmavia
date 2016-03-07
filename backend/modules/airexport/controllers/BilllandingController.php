@@ -114,7 +114,7 @@ class BilllandingController extends Controller
 
                     $max == 0 ? $max = 0+1 : $max = $max + 1;
                     
-                    $max == null ? $max = 0+1 : $max = $max + 1;
+                    //$max == null ? $max = 0+1 : $max = $max + 1;
 
                     if($max < 10){
                         $nol = '000'.$max;
